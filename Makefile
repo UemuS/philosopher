@@ -4,7 +4,7 @@ BNAME =
 
 CC = gcc
 
-FLAGS = -Wall -Werror -Wextra
+FLAGS = -Wall -Werror -Wextra -pthread
 
 IDIR = -I. -I./libft -I../libft -I.. -I.
 

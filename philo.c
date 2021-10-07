@@ -16,8 +16,8 @@ int	isnum(char *str)
 
 int	ft_size(char *nmb)
 {
-	if (ft_strlen(nmb) > 11 || ft_atoi(nmb) > INT_MAX
-		|| ft_atoi(nmb) < INT_MIN)
+	if (ft_strlen(nmb) > 11 || ft_atoi(nmb) > 500
+		|| ft_atoi(nmb) < 0)
 		return (1);
 	return (0);
 }
@@ -26,6 +26,35 @@ int	ft_error(char *str)
 {
 	write(1, str, ft_strlen(str));
 	return(2);
+}
+
+t_threads	*next_thread(int i)
+{
+	t_threads	*next;
+
+	next = malloc(sizeof(t_threads));
+	next->id = i + 1;
+	return (next);
+}
+
+t_threads	*make_threads(t_input *data)
+{
+	t_threads	*thread;
+	t_threads	*head;
+	int			i;
+
+	i = 1;
+	thread = malloc(sizeof(t_threads));
+	thread->next = NULL;
+	thread->id = 1;
+	head = thread;
+	while(i<data->n_ofphilo)
+	{
+		thread->next = next_thread(i);
+		thread = thread->next;
+		i++;
+	}
+	return(head);
 }
 
 void	ft_start(int ac, char **av)
@@ -41,7 +70,12 @@ void	ft_start(int ac, char **av)
 		data->cicle = ft_atoi(av[5]);
 	else
 		data->cicle = -1;
-	printf("number = %d | time to die = %d | time to eat = %d | time to sleep = %d | cicle = %d\n", data->n_ofphilo, data->t_todie, data->t_toeat, data->t_tosleep, data->cicle);
+	data->thread = make_threads(data);
+	while(data->thread)
+	{
+		printf("%d\n", data->thread->id);
+		data->thread = data->thread->next;
+	}
 }
 
 int	main(int ac, char **av)
@@ -54,8 +88,9 @@ int	main(int ac, char **av)
 	while(av[i])
 	{
 		if (isnum(av[i]) || ft_size(av[i]))
-			return(ft_error("arg is not a valid number"));
+			return(ft_error("not a valid arg"));
 		i++;
 	}
-	ft_start(ac,av);
+	if (ft_atoi(av[1]) > 0)
+		ft_start(ac,av);
 }
