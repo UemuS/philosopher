@@ -6,21 +6,24 @@
 #include "libft.h"
 #include <pthread.h>
 
-typedef	struct	s_threads
+typedef	struct	s_philos
 {
 	pthread_t 			thread;
 	int					id;
-	struct s_threads	*next;
-}				t_threads;
+	int	*n_eat;
+}				t_philos;
 
 typedef struct s_input
 {
-	int	n_ofphilo;
-	int	t_todie;
-	int	t_tosleep;
-	int	t_toeat;
-	int	cicle;
-	t_threads	*thread;
+	int			n_ofphilo;
+	int			t_todie;
+	int			t_tosleep;
+	int			t_toeat;
+	int			cicle;
+	int			n_yeated;
+	t_philos	*philos;
+	pthread_mutex_t	*forks;
+	pthread_mutex_t	print;
 }				t_input;
 
 

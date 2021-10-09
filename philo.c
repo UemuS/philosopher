@@ -28,34 +28,6 @@ int	ft_error(char *str)
 	return(2);
 }
 
-t_threads	*next_thread(int i)
-{
-	t_threads	*next;
-
-	next = malloc(sizeof(t_threads));
-	next->id = i + 1;
-	return (next);
-}
-
-t_threads	*make_threads(t_input *data)
-{
-	t_threads	*thread;
-	t_threads	*head;
-	int			i;
-
-	i = 1;
-	thread = malloc(sizeof(t_threads));
-	thread->next = NULL;
-	thread->id = 1;
-	head = thread;
-	while(i<data->n_ofphilo)
-	{
-		thread->next = next_thread(i);
-		thread = thread->next;
-		i++;
-	}
-	return(head);
-}
 
 void	ft_start(int ac, char **av)
 {
@@ -70,12 +42,6 @@ void	ft_start(int ac, char **av)
 		data->cicle = ft_atoi(av[5]);
 	else
 		data->cicle = -1;
-	data->thread = make_threads(data);
-	while(data->thread)
-	{
-		printf("%d\n", data->thread->id);
-		data->thread = data->thread->next;
-	}
 }
 
 int	main(int ac, char **av)
