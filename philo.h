@@ -8,9 +8,9 @@
 
 typedef	struct	s_philos
 {
-	pthread_t 			thread;
-	int					id;
-	int	*n_eat;
+	pthread_t 	thread;
+	int			id;
+	int			n_eat;
 }				t_philos;
 
 typedef struct s_input
@@ -20,7 +20,7 @@ typedef struct s_input
 	int			t_tosleep;
 	int			t_toeat;
 	int			cicle;
-	int			n_yeated;
+	int			ate;
 	t_philos	*philos;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print;
