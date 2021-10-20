@@ -28,82 +28,80 @@ int	ft_error(char *str)
 	return(2);
 }
 
-void		*printtest(void *dta)
+void	*printtest(void *phi)
 {
-	t_input *data;
+	t_philos *philo;
 
-
-	data = (t_input *)dta;
-	pthread_mutex_lock(&(data->print));
-	write(1, "hello\n" , 6);
-	pthread_mutex_unlock(&(data->print));
-	return 0;
+	philo = (t_philos *)phi;
+	pthread_mutex_lock(&(philo->data->forks[philo->id]));
+	pthread_mutex_lock(&(philo->data->forks[(philo->id -1 + philo->data->n_ofphilo) % philo->data->n_ofphilo]));
+	philo->n_eat++;
+	pthread_mutex_lock(&(philo->data->print));
+	printf("Philo number %d is eating fork id %d\n", philo->id, (philo->id - 1 + philo->data->n_ofphilo) % philo->data->n_ofphilo);
+	pthread_mutex_unlock(&(philo->data->print));
+	pthread_mutex_unlock(&(philo->data->forks[philo->id ]));
+	pthread_mutex_unlock(&(philo->data->forks[(philo->id -1 + philo->data->n_ofphilo) % philo->data->n_ofphilo]));
+	return NULL;
 }
 
-int	everyone_ate(t_input *data)
-{
-	int i;
-
-	i = 0;
-	while(i < data->n_ofphilo)
-	{
-		if (data->philos[i].id > data->ate)
-			i++;
-		else
-			return (0);
-	}
-	return (1);
-}
-
-int	make_philos(t_input *data)
+int	make_philos(t_philos *philos)
 {
 	int	i;
 
 	i = 0;
-	pthread_mutex_init(&(data->print), NULL);
-	while(i < data->n_ofphilo)
+	philos->data->forks = malloc(sizeof(pthread_mutex_t) * philos->data->n_ofphilo);
+	pthread_mutex_init(&(philos->data->print), NULL);
+	while(i < philos->data->n_ofphilo)
 	{
-		if (pthread_create(&(data->philos[i].thread), NULL, &printtest, data) != 0)
-			return (1);
-		data->philos[i].id = i + 1;
-		data->philos[i].n_eat = 0;
-		i++;
+		pthread_create(&(philos[i].thread), NULL, &printtest, &(philos[i]));
+		i+=2;
 	}
-	i = 0;
-	while(i < data->n_ofphilo)
+	usleep(200);
+	i = 1;
+	while(i < philos->data->n_ofphilo)
 	{
-		if (pthread_join(data->philos[i].thread, NULL) != 0)
-			return (1);
-		i++;
+		pthread_create(&(philos[i].thread), NULL, &printtest, &(philos[i]));
+		i+=2;
 	}
-	if (everyone_ate(data))
+	i = -1;
+	while(++i < philos->data->n_ofphilo)
 	{
-		data->ate++;
+		pthread_join(philos[i].thread, NULL);
 	}
-	pthread_mutex_destroy(&(data->print));
+	i = -1;
+	// while(++i < philos->data->n_ofphilo)
+	// 	printf("Philo number %d ate and reporting for duty \n", philos[i].id);
 	return (0);
 }
 
 int	ft_start(int ac, char **av)
 {
-	t_input	*data;
+	t_input		*data;
+	t_philos	*philos;
+	int			i;
 
+	i = -1;
 	data = malloc(sizeof(t_input));
 	data->n_ofphilo = ft_atoi(av[1]);
 	data->t_todie = ft_atoi(av[2]);
 	data->t_toeat = ft_atoi(av[3]);
 	data->t_tosleep = ft_atoi(av[4]);
-	data->ate = 0;
 	if (ac == 6)
 		data->cicle = ft_atoi(av[5]);
 	else
 		data->cicle = -1;
-	if ((data->philos = malloc(sizeof(t_philos) * data->n_ofphilo)) == NULL)
+	if ((philos = malloc(sizeof(t_philos) * data->n_ofphilo)) == NULL)
 	{
 		write(2, "failed to allocate\n", 19);
 		return (1);
 	}
-	return (make_philos(data));
+	while(++i < data->n_ofphilo)
+	{
+		philos[i].id = i;
+		philos[i].n_eat = 0;
+		philos[i].data = data;
+	}
+	return (make_philos(philos));
 }
 
 int	main(int ac, char **av)
@@ -116,7 +114,12 @@ int	main(int ac, char **av)
 	while(av[i])
 	{
 		if (isnum(av[i]) || ft_size(av[i]))
-			return(ft_error("not a valid arg"));
+			return(ft_error("Not a valid arg"));
+		if (i > 1 && i < 5)
+		{
+			if (ft_atoi(av[i]) < 60)
+				return (ft_error("Number is too small"));
+		}
 		i++;
 	}
 	if (ft_atoi(av[1]) > 0)
